@@ -53,6 +53,7 @@ module.exports = {
     urlPath: 'deprecations',
     reportDir: 'deprecation-reports',
   }),
+};
 ```
 
 This will create a middleware that will listen for requests to the `deprecations` path. Any requests to this path will be passed through to the `deprecation-workflow` middleware. The output of this middleware will be stored in the `deprecation-reports` directory.
