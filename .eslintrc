@@ -28,6 +28,7 @@
       }
     ],
     "unicorn/no-reduce": "off",
+    "unicorn/prefer-node-protocol": "off",
     "unicorn/prevent-abbreviations": "off",
     "unicorn/no-process-exit": "off",
     "unicorn/import-style": "off",

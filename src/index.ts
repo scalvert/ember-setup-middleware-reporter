@@ -2,25 +2,20 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import fs from 'fs-extra';
 import type * as http from 'http';
-import type {
-  Application,
-  NextFunction,
-  Request,
-  RequestHandler,
-  Response,
-} from 'express';
+import type { Application, Request, RequestHandler, Response } from 'express';
 import type { Query, RouteParameters } from 'express-serve-static-core';
+import errorhandler from 'errorhandler';
 
-export interface MiddlewareUtilsOptions {
+export interface MiddlewareOptions {
   name: string;
   root?: string;
   url?: string;
   reportDir?: string;
 }
 
-export interface SetupMiddlewareUtilsOptions extends MiddlewareUtilsOptions {
+export interface SetupMiddlewareOptions extends MiddlewareOptions {
   buildHandlers?(
-    options: MiddlewareUtilsOptions
+    options: MiddlewareOptions
   ): Array<
     RequestHandler<
       RouteParameters<string>,
@@ -36,7 +31,31 @@ interface EmberCliAddon {
   project: { root: string };
 }
 
-export function setupMiddlewareHooks(options: SetupMiddlewareUtilsOptions) {
+/**
+ * Sets up the middleware hooks that are required by the ember-cli addon. The return value of this function should
+ * be merged into the object returned from an ember app or addon's index.js file.
+ *
+ * @example
+ *
+ * 'use strict';
+ *
+ * const { setupMiddlewareHooks } = require('ember-setup-middleware-reporter');
+ *
+ * module.exports = {
+ *   name: require('./package').name,
+ *
+ *   ...setupMiddlewareHooks({
+ *      name: 'deprecations',
+ *      reportDir: 'deprecation-reports'
+ *   }),
+ * };
+ *
+ * @param options - An options object that contains necessary information for the middleware to run.
+ * @returns An object containing a serverMiddleware and testemMiddleware functions that setup the middleware.
+ */
+export function setupMiddlewareHooks(
+  options: SetupMiddlewareOptions
+): Record<string, any> {
   return {
     serverMiddleware(
       this: EmberCliAddon,
@@ -57,16 +76,37 @@ export function setupMiddlewareHooks(options: SetupMiddlewareUtilsOptions) {
   };
 }
 
+/**
+ * A utility function that sets up posting to a specific middleware endpoint for the ember-cli addon.
+ *
+ * @param app - The express application.
+ * @param options - An options object that contains necessary information for the middleware to run.
+ */
 export function setupMiddleware(
   app: Application,
-  options: SetupMiddlewareUtilsOptions
-) {
+  options: SetupMiddlewareOptions
+): void {
   const buildHandlers = options.buildHandlers ?? buildDefaultHandlers;
 
-  app.post(buildUrlFromOptions(options), ...buildHandlers(options));
+  app.post(buildUrlFromOptions(options), ...buildHandlers(app, options));
 }
 
-export function buildDefaultHandlers(options: MiddlewareUtilsOptions) {
+/**
+ * Builds an array of default handlers that can be leveraged out of the box by the ember-cli addon.
+ * The default handlers include one that writes the response to a file.
+ *
+ * @param app - The express application.
+ * @param options - An options object that contains necessary information for the middleware to run.
+ * @returns An array of default handlers.
+ */
+export function buildDefaultHandlers(
+  app: Application,
+  options: MiddlewareOptions
+): Array<
+  RequestHandler<RouteParameters<string>, any, any, Query, Record<string, any>>
+> {
+  app.use(errorhandler());
+
   return [
     bodyParser.json({ limit: '50mb' }),
     (req: Request, res: Response) => {
@@ -83,30 +123,37 @@ export function buildDefaultHandlers(options: MiddlewareUtilsOptions) {
         outputPath,
       });
     },
-    logMiddlewareError,
   ];
 }
 
-export function buildRootFromOptions(options: MiddlewareUtilsOptions) {
+/**
+ * Builds the root directory for the middleware report.
+ *
+ * @param options - An options object that contains necessary information for the middleware to run.
+ * @returns A string containing the root directory for the middleware report.
+ */
+export function buildRootFromOptions(options: MiddlewareOptions): string {
   return options.root ?? process.cwd();
 }
 
-export function buildUrlFromOptions(options: MiddlewareUtilsOptions) {
+/**
+ * Builds the URL for the middleware report.
+ *
+ * @param options - An options object that contains necessary information for the middleware to run.
+ * @returns A string containing the url for the middleware report.
+ */
+export function buildUrlFromOptions(options: MiddlewareOptions): string {
   return options.url ?? `/${options.name}`;
 }
 
-export function buildReportDirFromOptions(options: MiddlewareUtilsOptions) {
+/**
+ * Builds the report directory for the middleware report.
+ *
+ * @param options - An options object that contains necessary information for the middleware to run.
+ * @returns A string containing the report directory for the middleware report.
+ */
+export function buildReportDirFromOptions(options: MiddlewareOptions): string {
   return (
     options.reportDir ?? path.join(buildRootFromOptions(options), options.name)
   );
-}
-
-export function logMiddlewareError(
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  console.error(err.stack);
-  next(err);
 }

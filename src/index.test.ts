@@ -3,8 +3,8 @@ import * as http from 'http';
 import tmp from 'tmp';
 import express from 'express';
 import fetch from 'node-fetch';
-import { setupMiddleware } from './index';
 import fs from 'fs-extra';
+import { setupMiddleware } from './index';
 
 function createTmpDir() {
   return tmp.dirSync({ unsafeCleanup: true }).name;
