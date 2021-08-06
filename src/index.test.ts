@@ -108,14 +108,21 @@ describe('setupMiddleware', () => {
 });
 
 describe('buildRootFromOptions', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = createTmpDir();
+  });
+
   it('can build a root path from options when root is provided', () => {
     const options = {
       name: 'foo',
+      root: tmpDir,
     };
 
     const root = buildRootFromOptions(options);
 
-    expect(root).toBe(process.cwd());
+    expect(root).toBe(tmpDir);
   });
 
   it('can build a root path from options', () => {
