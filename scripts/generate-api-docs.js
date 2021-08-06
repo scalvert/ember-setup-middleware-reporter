@@ -1,13 +1,11 @@
 import path from 'path';
 import fs from 'fs';
 import jsdoc2md from 'jsdoc-to-markdown';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
 
 (async function () {
   debugger;
-  const readmeFile = path.join(path.dirname(__filename), '..', 'README.md');
+  // eslint-disable-next-line unicorn/prefer-module
+  const readmeFile = path.join(__dirname, '..', 'README.md');
   const readmeContent = fs.readFileSync(readmeFile, 'utf8');
   const docsPlaceholder = /<!--DOCS_START-->[\S\s]*<!--DOCS_END-->/;
 
