@@ -12,6 +12,34 @@
 
 Ember apps and addons include a mechanism to setup server middleware in order to inject additional work into the ember-cli pipeline. The process of setting up server middleware is repetitive, so this package provides a few utilities to make it easier.
 
+## Installation
+
+```sh
+npm install @scalvert/ember-setup-middleware-reporter --save-dev
+```
+
+## Usage
+
+This package's functions are provided in small, composable pieces. Each allow you to succesively build up a middleware pipeline.
+
+In most cases, using the `setupMiddlewareHooks` function will be the easiest way to get started. By providing only the `name` option, this value will be used for both the `url` and `reportDir` options. This means that any output generated as the result of this middleware running will be stored in the `reportDir` directory.
+
+```js
+'use strict';
+
+const { setupMiddlewareHooks } = require('ember-setup-middleware-reporter');
+
+module.exports = {
+  name: require('./package').name,
+
+  ...setupMiddlewareHooks({
+    name: 'deprecations',
+  }),
+};
+```
+
+The following functions are provided:
+
 <!--DOCS_START-->
 
 ## Functions
@@ -21,7 +49,7 @@ Ember apps and addons include a mechanism to setup server middleware in order to
 <dd><p>Sets up the middleware hooks that are required by the ember-cli addon. The return value of this function should
 be merged into the object returned from an ember app or addon&#39;s index.js file.</p>
 </dd>
-<dt><a href="#setupMiddleware">setupMiddleware(app, options)</a></dt>
+<dt><a href="#setupMiddleware">setupMiddleware(app, options)</a> ⇒</dt>
 <dd><p>A utility function that sets up posting to a specific middleware endpoint for the ember-cli addon.</p>
 </dd>
 <dt><a href="#buildDefaultHandlers">buildDefaultHandlers(app, options)</a> ⇒</dt>
@@ -31,7 +59,7 @@ The default handlers include one that writes the response to a file.</p>
 <dt><a href="#buildRootFromOptions">buildRootFromOptions(options)</a> ⇒</dt>
 <dd><p>Builds the root directory for the middleware report.</p>
 </dd>
-<dt><a href="#buildUrlFromOptions">buildUrlFromOptions(options)</a> ⇒</dt>
+<dt><a href="#buildUrlPathFromOptions">buildUrlPathFromOptions(options)</a> ⇒</dt>
 <dd><p>Builds the URL for the middleware report.</p>
 </dd>
 <dt><a href="#buildReportDirFromOptions">buildReportDirFromOptions(options)</a> ⇒</dt>
@@ -51,6 +79,10 @@ be merged into the object returned from an ember app or addon's index.js file.
 | Param | Description |
 | --- | --- |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
+| [options.buildHandlers] | A function that takes the options object and returns an array of handlers. |
 
 **Example**  
 ```js
@@ -69,15 +101,20 @@ module.exports = {
 ```
 <a name="setupMiddleware"></a>
 
-## setupMiddleware(app, options)
+## setupMiddleware(app, options) ⇒
 A utility function that sets up posting to a specific middleware endpoint for the ember-cli addon.
 
 **Kind**: global function  
+**Returns**: An object containing a serverMiddleware and testemMiddleware functions that setup the middleware.  
 
 | Param | Description |
 | --- | --- |
 | app | The express application. |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
+| [options.buildHandlers] | A function that takes the options object and returns an array of handlers. |
 
 <a name="buildDefaultHandlers"></a>
 
@@ -92,6 +129,9 @@ The default handlers include one that writes the response to a file.
 | --- | --- |
 | app | The express application. |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
 
 <a name="buildRootFromOptions"></a>
 
@@ -104,10 +144,13 @@ Builds the root directory for the middleware report.
 | Param | Description |
 | --- | --- |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
 
-<a name="buildUrlFromOptions"></a>
+<a name="buildUrlPathFromOptions"></a>
 
-## buildUrlFromOptions(options) ⇒
+## buildUrlPathFromOptions(options) ⇒
 Builds the URL for the middleware report.
 
 **Kind**: global function  
@@ -116,6 +159,9 @@ Builds the URL for the middleware report.
 | Param | Description |
 | --- | --- |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
 
 <a name="buildReportDirFromOptions"></a>
 
@@ -128,6 +174,9 @@ Builds the report directory for the middleware report.
 | Param | Description |
 | --- | --- |
 | options | An options object that contains necessary information for the middleware to run. |
+| options.name | The name of the middleware. |
+| [options.urlPath] | The url that the middleware should respond to. If url is not provided, options.name will be used. |
+| [options.reportDir] | The directory where the reports should be written to. If reportDir is not provided, options.name will be used. |
 
 
 <!--DOCS_END-->

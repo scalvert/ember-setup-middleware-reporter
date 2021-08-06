@@ -8,9 +8,9 @@ import errorhandler from 'errorhandler';
 
 export interface MiddlewareOptions {
   name: string;
-  root?: string;
-  url?: string;
+  urlPath?: string;
   reportDir?: string;
+  root?: string;
 }
 
 export interface SetupMiddlewareOptions extends MiddlewareOptions {
@@ -51,6 +51,10 @@ interface EmberCliAddon {
  * };
  *
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
+ * @param [options.buildHandlers] - A function that takes the options object and returns an array of handlers.
  * @returns An object containing a serverMiddleware and testemMiddleware functions that setup the middleware.
  */
 export function setupMiddlewareHooks(
@@ -81,6 +85,11 @@ export function setupMiddlewareHooks(
  *
  * @param app - The express application.
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
+ * @param [options.buildHandlers] - A function that takes the options object and returns an array of handlers.
+ * @returns An object containing a serverMiddleware and testemMiddleware functions that setup the middleware.
  */
 export function setupMiddleware(
   app: Application,
@@ -88,7 +97,7 @@ export function setupMiddleware(
 ): void {
   const buildHandlers = options.buildHandlers ?? buildDefaultHandlers;
 
-  app.post(buildUrlFromOptions(options), ...buildHandlers(app, options));
+  app.post(buildUrlPathFromOptions(options), ...buildHandlers(app, options));
 }
 
 /**
@@ -97,6 +106,9 @@ export function setupMiddleware(
  *
  * @param app - The express application.
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
  * @returns An array of default handlers.
  */
 export function buildDefaultHandlers(
@@ -111,7 +123,7 @@ export function buildDefaultHandlers(
     bodyParser.json({ limit: '50mb' }),
     (req: Request, res: Response) => {
       const outputDir = buildReportDirFromOptions(options);
-      const REPORT_TIMESTAMP = new Date().toISOString();
+      const REPORT_TIMESTAMP = new Date().toISOString().replace(/[.:]/g, '-');
       const outputPath = path.resolve(
         path.join(outputDir, `${REPORT_TIMESTAMP}.json`)
       );
@@ -130,6 +142,9 @@ export function buildDefaultHandlers(
  * Builds the root directory for the middleware report.
  *
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
  * @returns A string containing the root directory for the middleware report.
  */
 export function buildRootFromOptions(options: MiddlewareOptions): string {
@@ -140,20 +155,33 @@ export function buildRootFromOptions(options: MiddlewareOptions): string {
  * Builds the URL for the middleware report.
  *
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
  * @returns A string containing the url for the middleware report.
  */
-export function buildUrlFromOptions(options: MiddlewareOptions): string {
-  return options.url ?? `/${options.name}`;
+export function buildUrlPathFromOptions(options: MiddlewareOptions): string {
+  if (options.urlPath) {
+    return options.urlPath.charAt(0) !== '/'
+      ? `/${options.urlPath}`
+      : options.urlPath;
+  }
+
+  return `/${options.name}`;
 }
 
 /**
  * Builds the report directory for the middleware report.
  *
  * @param options - An options object that contains necessary information for the middleware to run.
+ * @param options.name - The name of the middleware.
+ * @param [options.urlPath] - The url that the middleware should respond to. If url is not provided, options.name will be used.
+ * @param [options.reportDir] - The directory where the reports should be written to. If reportDir is not provided, options.name will be used.
  * @returns A string containing the report directory for the middleware report.
  */
 export function buildReportDirFromOptions(options: MiddlewareOptions): string {
-  return (
-    options.reportDir ?? path.join(buildRootFromOptions(options), options.name)
+  return path.join(
+    buildRootFromOptions(options),
+    options.reportDir ?? options.name
   );
 }

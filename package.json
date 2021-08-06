@@ -28,10 +28,11 @@
   ],
   "scripts": {
     "build": "tsc",
-    "docs": "node ./scripts/generate-api-docs.js",
+    "docs": "npm run build && node ./scripts/generate-api-docs.js",
     "lint": "eslint . --ext js,ts",
     "pretest": "npm run build",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "npm run build && node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "npm run build && node --experimental-vm-modules node_modules/.bin/jest --watch --runInBand"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.12",
