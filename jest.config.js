@@ -1,5 +1,5 @@
 // eslint-disable-next-line unicorn/prefer-module
-export default {
+module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['js'],
   roots: ['lib'],

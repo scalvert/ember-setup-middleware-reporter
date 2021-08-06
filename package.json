@@ -16,7 +16,6 @@
   },
   "license": "MIT",
   "author": "scalvert",
-  "type": "module",
   "exports": {
     ".": "./lib/index.js"
   },
@@ -31,8 +30,8 @@
     "docs": "npm run build && node ./scripts/generate-api-docs.js",
     "lint": "eslint . --ext js,ts",
     "pretest": "npm run build",
-    "test": "npm run build && node --experimental-vm-modules node_modules/.bin/jest",
-    "test:watch": "npm run build && node --experimental-vm-modules node_modules/.bin/jest --watch --runInBand"
+    "test": "npm run build && node node_modules/.bin/jest",
+    "test:watch": "npm run build && node node_modules/.bin/jest --watch --runInBand"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.12",
